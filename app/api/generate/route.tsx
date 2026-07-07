@@ -10,22 +10,43 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const REPLICATE_MODEL = "black-forest-labs/flux-schnell";
+const REPLICATE_TIMEOUT_MS = 25_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
+    promise.then(
+      (v) => {
+        clearTimeout(t);
+        resolve(v);
+      },
+      (err) => {
+        clearTimeout(t);
+        reject(err);
+      },
+    );
+  });
+}
 
 async function generateHero(prompt: string): Promise<{ url: string | null; error?: string }> {
   const token = process.env.REPLICATE_API_TOKEN;
   if (!token) return { url: null, error: "REPLICATE_API_TOKEN not set" };
   const replicate = new Replicate({ auth: token });
   try {
-    const output = (await replicate.run(REPLICATE_MODEL, {
-      input: {
-        prompt,
-        aspect_ratio: "3:2",
-        output_format: "jpg",
-        output_quality: 85,
-        num_outputs: 1,
-        num_inference_steps: 4,
-      },
-    })) as unknown;
+    const output = (await withTimeout(
+      replicate.run(REPLICATE_MODEL, {
+        input: {
+          prompt,
+          aspect_ratio: "3:2",
+          output_format: "jpg",
+          output_quality: 85,
+          num_outputs: 1,
+          num_inference_steps: 4,
+        },
+      }),
+      REPLICATE_TIMEOUT_MS,
+      "replicate.run",
+    )) as unknown;
 
     const pick = (v: unknown): string | null => {
       if (typeof v === "string") return v;
@@ -46,7 +67,7 @@ async function generateHero(prompt: string): Promise<{ url: string | null; error
 
 async function fetchImageAsDataUrl(url: string): Promise<string | null> {
   try {
-    const res = await fetch(url);
+    const res = await withTimeout(fetch(url), 8_000, "hero fetch");
     if (!res.ok) return null;
     const buf = Buffer.from(await res.arrayBuffer());
     const contentType = res.headers.get("content-type") || "image/jpeg";
@@ -58,6 +79,7 @@ async function fetchImageAsDataUrl(url: string): Promise<string | null> {
 }
 
 async function render(dayId: string, bust: string | null) {
+  const t0 = performance.now();
   const day = getDay(dayId);
   if (!day) {
     return Response.json({ error: "unknown_day", dayId }, { status: 400 });
@@ -65,12 +87,14 @@ async function render(dayId: string, bust: string | null) {
 
   const [hero, fonts] = await Promise.all([
     generateHero(day.heroPrompt),
-    loadSheetFonts().catch((err) => {
+    withTimeout(loadSheetFonts(), 10_000, "loadSheetFonts").catch((err) => {
       console.error("font load failed:", err);
       return [] as Awaited<ReturnType<typeof loadSheetFonts>>;
     }),
   ]);
+  const tHero = performance.now();
   const heroDataUrl = hero.url ? await fetchImageAsDataUrl(hero.url) : null;
+  const tFetch = performance.now();
 
   const image = new ImageResponse(<SheetTemplate day={day} heroImageUrl={heroDataUrl} />, {
     width: SHEET_WIDTH,
@@ -80,6 +104,11 @@ async function render(dayId: string, bust: string | null) {
 
   // Drain the ImageResponse so satori/resvg errors surface inside our try/catch.
   const buf = Buffer.from(await image.arrayBuffer());
+  const tRender = performance.now();
+
+  console.log(
+    `[generate ${dayId}] hero+fonts=${Math.round(tHero - t0)}ms fetch=${Math.round(tFetch - tHero)}ms render=${Math.round(tRender - tFetch)}ms total=${Math.round(tRender - t0)}ms source=${hero.url ? "replicate" : hero.error || "none"}`,
+  );
 
   // If bust is set we still return the fresh PNG but forbid caching so the next
   // no-bust request re-hits the origin and refreshes the cached copy.
