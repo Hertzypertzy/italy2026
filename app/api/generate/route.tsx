@@ -113,17 +113,13 @@ async function render(dayId: string, bust: string | null) {
     `[generate ${dayId}] hero+fonts=${Math.round(tHero - t0)}ms fetch=${Math.round(tFetch - tHero)}ms render=${Math.round(tRender - tFetch)}ms total=${Math.round(tRender - t0)}ms source=${hero.url ? "replicate" : hero.error || "none"}`,
   );
 
-  // If bust is set we still return the fresh PNG but forbid caching so the next
-  // no-bust request re-hits the origin and refreshes the cached copy.
-  const cacheControl = bust
-    ? "no-store"
-    : "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800";
-
+  // Every URL is cacheable — `?v=<ts>` from a regenerate is a distinct edge
+  // key, so the client can pin its preferred version by remembering the ts.
   return new Response(buf, {
     status: 200,
     headers: {
       "content-type": "image/png",
-      "cache-control": cacheControl,
+      "cache-control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800",
       "content-disposition": `inline; filename="${day.id}.png"`,
       "x-hero-source": hero.url ? "replicate" : hero.error || "none",
     },

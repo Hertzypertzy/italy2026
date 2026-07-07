@@ -340,6 +340,25 @@ export function SheetTemplate({ day, heroImageUrl }: Props) {
           ) : null}
         </div>
 
+        {/* Hotel bar (optional) */}
+        {day.hotel ? (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "10px 14px",
+              background: card,
+              border: `1px solid ${line}`,
+              borderRadius: 12,
+              marginTop: -6,
+            }}
+          >
+            <div style={{ display: "flex", fontSize: 20 }}>🛏️</div>
+            <div style={{ display: "flex", fontSize: 16, color: muted, flex: 1 }}>{day.hotel}</div>
+          </div>
+        ) : null}
+
         {/* Trivia strip (optional, shown only if space) */}
         {day.trivia && day.trivia.length > 0 ? (
           <div

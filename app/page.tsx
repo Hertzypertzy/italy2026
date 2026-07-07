@@ -3,6 +3,33 @@
 import { useMemo, useState } from "react";
 import { DAYS, CITY_ACCENTS } from "@/data/days";
 
+// Persist "which regenerate is the user's favorite for this day" in
+// localStorage. Every regenerate mints a fresh version tag; future picks
+// of the same day resolve to that pinned version so the CDN serves it
+// instantly and consistently.
+const VERSIONS_KEY = "trip-sheet-versions-v1";
+
+function loadVersions(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(VERSIONS_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, string>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveVersion(dayId: string, v: string) {
+  if (typeof window === "undefined") return;
+  try {
+    const current = loadVersions();
+    current[dayId] = v;
+    window.localStorage.setItem(VERSIONS_KEY, JSON.stringify(current));
+  } catch {
+    // storage may be blocked; regenerate still works, just not sticky.
+  }
+}
+
 export default function Home() {
   const [dayId, setDayId] = useState<string>(DAYS[0]?.id ?? "");
   const [imgUrl, setImgUrl] = useState<string | null>(null);
@@ -13,7 +40,7 @@ export default function Home() {
   const selected = useMemo(() => DAYS.find((d) => d.id === dayId), [dayId]);
   const accent = selected ? CITY_ACCENTS[selected.city].color : "#2c6bed";
 
-  async function generate(opts: { bust?: boolean } = {}) {
+  async function generate(opts: { fresh?: boolean } = {}) {
     if (!dayId) return;
     setLoading(true);
     setError(null);
@@ -22,7 +49,14 @@ export default function Home() {
     setImgUrl(null);
     try {
       const params = new URLSearchParams({ dayId });
-      if (opts.bust) params.set("bust", String(Date.now()));
+      let version: string | null = null;
+      if (opts.fresh) {
+        version = String(Date.now());
+        params.set("v", version);
+      } else {
+        const pinned = loadVersions()[dayId];
+        if (pinned) params.set("v", pinned);
+      }
       const started = performance.now();
       const res = await fetch(`/api/generate?${params}`);
       if (!res.ok) {
@@ -32,9 +66,9 @@ export default function Home() {
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       setImgUrl(url);
-      // If it came back in <1s and we didn't bust, assume edge cache hit.
+      if (version) saveVersion(dayId, version);
       const elapsed = performance.now() - started;
-      setFromCache(!opts.bust && elapsed < 1000);
+      setFromCache(!opts.fresh && elapsed < 1000);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
     } finally {
@@ -246,7 +280,7 @@ export default function Home() {
               Share / Download
             </button>
             <button
-              onClick={() => generate({ bust: true })}
+              onClick={() => generate({ fresh: true })}
               disabled={loading}
               style={{
                 appearance: "none",
