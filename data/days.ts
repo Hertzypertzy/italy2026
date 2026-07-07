@@ -47,9 +47,14 @@ export const DAYS: Day[] = [
       { time: "", emoji: "📅", title: "Picture the trip", note: "4 cities, theme parks, Venice, Rome… get excited!" },
       { time: "", emoji: "🧺", title: "Clear a packing corner", note: "Somewhere to pile things as you think of them" },
     ],
+    trivia: [
+      { emoji: "🍕", text: "Pizza was invented in Naples about 250 years ago — and Italians still make it best." },
+      { emoji: "🇮🇹", text: "The Italian flag has 3 stripes: green, white, and red — count them when you spot one." },
+    ],
+    wordOfDay: { word: "Ciao!", pron: "chow", meaning: "hello AND goodbye" },
     challenge: { emoji: "🤩", text: "Everyone name the ONE thing they're most excited about" },
     heroPrompt:
-      "A warm playful flat-illustration banner: a big cheerful calendar with a circled date and a small airplane and Italian flag flying off it, confetti in the air. Purple palette, rounded shapes, children's-picture-book style, lots of negative space. NO text, no words, no letters in the image.",
+      "A warm playful flat-illustration banner: a big cheerful calendar with a circled date and a small airplane and Italian flag flying off it, confetti in the air. Vibrant saturated purple sky background, bright cheerful colors, energetic. Rounded shapes, children's-picture-book style, lots of negative space. NO text, no words, no letters in the image.",
   },
 
   {
@@ -71,9 +76,14 @@ export const DAYS: Day[] = [
       { time: "", emoji: "🎒", title: "Start packing", note: "Add to the pile as ideas pop up" },
       { time: "", emoji: "🔋", title: "Charge devices", note: "Tablets, headphones, power bank" },
     ],
+    trivia: [
+      { emoji: "🍝", text: "Italians eat over 25 kg of pasta per person every year — more than anyone else on Earth!" },
+      { emoji: "🐺", text: "Rome was founded, legend says, by twin brothers who were raised by a wolf." },
+    ],
+    wordOfDay: { word: "Grazie", pron: "GRAH-tsee-eh", meaning: "thank you" },
     challenge: { emoji: "🎮", text: "Kids: start downloading movies & games for the plane" },
     heroPrompt:
-      "A warm playful flat-illustration banner: a happy family of four excitedly packing colorful suitcases with a small cartoon airplane in a soft sky. Purple palette, rounded shapes, children's-book style, negative space. NO text, no words, no letters in the image.",
+      "A warm playful flat-illustration banner: a happy family of four excitedly packing colorful suitcases with a small cartoon airplane in the sky. Vibrant saturated purple sky background, bright cheerful colors. Rounded shapes, children's-book style, negative space. NO text, no words, no letters in the image.",
   },
 
   {
@@ -95,9 +105,14 @@ export const DAYS: Day[] = [
       { time: "", emoji: "🧴", title: "Toiletries bag", note: "Toothbrush, toothpaste, sunscreen, deodorant" },
       { time: "", emoji: "🎧", title: "Test headphones", note: "Make sure everyone's plane audio works" },
     ],
+    trivia: [
+      { emoji: "🎨", text: "The Mona Lisa was painted by Leonardo da Vinci — one of the most famous Italians ever." },
+      { emoji: "🏛️", text: "Italy has 60 UNESCO World Heritage sites — the most of any country in the world." },
+    ],
+    wordOfDay: { word: "Per favore", pron: "per fah-VOH-reh", meaning: "please" },
     challenge: { emoji: "🍕", text: "Family vote: most excited for pizza, gelato, or the rides?" },
     heroPrompt:
-      "A warm playful flat-illustration banner: a cheerful open suitcase with folded summer clothes, a sun hat, sunglasses and a swim ring spilling out in the sunshine. Purple-and-cream palette, rounded shapes, children's-book style. NO text, no words, no letters in the image.",
+      "A warm playful flat-illustration banner: a cheerful open suitcase with folded summer clothes, a sun hat, sunglasses and a swim ring spilling out. Vibrant saturated purple background, bright cheerful colors, sunny. Rounded shapes, children's-book style. NO text, no words, no letters in the image.",
   },
 
   {
@@ -119,9 +134,14 @@ export const DAYS: Day[] = [
       { time: "", emoji: "📖", title: "Pick a book to bring", note: "Something good for the flight" },
       { time: "", emoji: "🎮", title: "Load plane entertainment", note: "Games, movies, all downloaded" },
     ],
+    trivia: [
+      { emoji: "🌋", text: "Italy has 3 active volcanoes: Vesuvius, Etna, and Stromboli. Etna erupts almost every year!" },
+      { emoji: "🍦", text: "Gelato is denser than regular ice cream — that's why one scoop feels twice as satisfying." },
+    ],
+    wordOfDay: { word: "Buongiorno", pron: "bwon-JOR-no", meaning: "good morning" },
     challenge: { emoji: "🗣️", text: "Learn to say 'Ciao!' and 'Grazie!' — practice on the family" },
     heroPrompt:
-      "A warm playful flat-illustration banner: a kid happily zipping up a small rolling carry-on bag packed with a book, headphones and a game controller. Purple palette, rounded shapes, children's-book style, negative space. NO text, no words, no letters in the image.",
+      "A warm playful flat-illustration banner: a kid happily zipping up a small rolling carry-on bag packed with a book, headphones and a game controller. Vibrant saturated purple background, bright cheerful colors. Rounded shapes, children's-book style, negative space. NO text, no words, no letters in the image.",
   },
 
   {
@@ -143,9 +163,14 @@ export const DAYS: Day[] = [
       { time: "", emoji: "📱", title: "Download offline maps", note: "Verona, Garda, Florence, Rome" },
       { time: "", emoji: "🔌", title: "Pack chargers + adapter", note: "Italy uses type F/L plugs" },
     ],
+    trivia: [
+      { emoji: "🚗", text: "Ferrari, Lamborghini, and the Vespa scooter are all Italian inventions." },
+      { emoji: "⚽", text: "Italy has won the football World Cup 4 times — one of the best teams in history." },
+    ],
+    wordOfDay: { word: "Andiamo!", pron: "an-DYAH-mo", meaning: "let's go!" },
     challenge: { emoji: "🍦", text: "Master 'un gelato, per favore!' for real gelato-ordering glory" },
     heroPrompt:
-      "A warm playful flat-illustration banner: a cartoon map of Italy with little icons — a leaning tower, a colosseum, a gondola, a roller coaster — dotted along it. Purple accents, rounded shapes, children's-book style. NO text, no words, no letters in the image.",
+      "A warm playful flat-illustration banner: a cartoon map of Italy shaped like a boot with little icons — a leaning tower, a colosseum, a gondola, a roller coaster — dotted along it. Vibrant saturated purple background, bright cheerful colors. Rounded shapes, children's-book style. NO text, no words, no letters in the image.",
   },
 
   {
@@ -166,9 +191,14 @@ export const DAYS: Day[] = [
       { time: "", emoji: "🪥", title: "Toiletries check", note: "Toothbrush, toothpaste, deodorant, sunscreen" },
       { time: "", emoji: "🔋", title: "Charge everything overnight", note: "Full batteries for travel day" },
     ],
+    trivia: [
+      { emoji: "🏰", text: "Italy has more castles than any other European country — thousands of them!" },
+      { emoji: "👋", text: "Italians talk with their hands — there are over 250 different Italian hand gestures." },
+    ],
+    wordOfDay: { word: "Bello", pron: "BEL-lo", meaning: "beautiful" },
     challenge: { emoji: "📸", text: "Decide who's the family photographer for the trip!" },
     heroPrompt:
-      "A warm playful flat-illustration banner: two packed suitcases side by side with a camera, sunglasses and a passport on top, ready to go. Purple palette, rounded shapes, children's-book style, negative space. NO text, no words, no letters in the image.",
+      "A warm playful flat-illustration banner: two packed suitcases side by side with a camera, sunglasses and a passport on top, ready to go. Vibrant saturated purple background, bright cheerful colors. Rounded shapes, children's-book style, negative space. NO text, no words, no letters in the image.",
   },
 
   {
@@ -189,9 +219,14 @@ export const DAYS: Day[] = [
       { time: "", emoji: "📄", title: "Passports + tickets ready", note: "Stacked by the door tonight" },
       { time: "", emoji: "🛏️", title: "Early night", note: "Big travel day tomorrow — sleep well!" },
     ],
+    trivia: [
+      { emoji: "🗺️", text: "Italy is shaped like a high-heeled boot on the map — the easiest country to spot!" },
+      { emoji: "✈️", text: "We fly ~2,300 km tomorrow — from Tel Aviv all the way to Verona in about 5 hours." },
+    ],
+    wordOfDay: { word: "Buonanotte", pron: "bwoh-na-NOT-teh", meaning: "good night" },
     challenge: { emoji: "😴", text: "Get a great sleep — the adventure begins tomorrow!" },
     heroPrompt:
-      "A warm cozy flat-illustration banner: packed suitcases lined up by a front door at night with a passport and airplane ticket on top and a crescent moon in the window. Calm purple night palette, rounded shapes, children's-book style. NO text, no words, no letters in the image.",
+      "A warm cozy flat-illustration banner: packed suitcases lined up by a front door at night with a passport and airplane ticket on top and a crescent moon in the window. Deep vibrant purple night sky background, glowing warm interior light, dreamy and cheerful. Rounded shapes, children's-book style. NO text, no words, no letters in the image.",
   },
 
   // ==================== 15 TRIP DAYS ====================
