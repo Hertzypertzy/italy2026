@@ -1,0 +1,28 @@
+:root {
+  --ink: #1a2238;
+  --paper: #fdfcf9;
+  --card: #ffffff;
+  --muted: #7a8290;
+  --line: #eeebe4;
+  --accent: #2c6bed;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+select {
+  font-family: inherit;
+}
