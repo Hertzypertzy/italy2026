@@ -69,9 +69,17 @@ export async function POST(req: NextRequest) {
     const hero = await generateHero(day.heroPrompt);
     const heroDataUrl = hero.url ? await fetchImageAsDataUrl(hero.url) : null;
 
-    return new ImageResponse(<SheetTemplate day={day} heroImageUrl={heroDataUrl} />, {
+    const image = new ImageResponse(<SheetTemplate day={day} heroImageUrl={heroDataUrl} />, {
       width: SHEET_WIDTH,
       height: SHEET_HEIGHT,
+    });
+
+    // Drain the ImageResponse body so satori/resvg errors surface here
+    // (not in Next's late pipe-response layer where they become opaque 500s).
+    const buf = Buffer.from(await image.arrayBuffer());
+
+    return new Response(buf, {
+      status: 200,
       headers: {
         "content-type": "image/png",
         "cache-control": "public, max-age=3600, s-maxage=3600",

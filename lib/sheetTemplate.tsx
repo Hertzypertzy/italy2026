@@ -58,7 +58,10 @@ export function SheetTemplate({ day, heroImageUrl }: Props) {
             height={620}
             style={{
               position: "absolute",
-              inset: 0,
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
               width: SHEET_WIDTH,
               height: 620,
               objectFit: "cover",
@@ -303,7 +306,7 @@ export function SheetTemplate({ day, heroImageUrl }: Props) {
                 {day.wordOfDay.word}
               </div>
               <div style={{ fontSize: 16, color: muted, marginTop: 2 }}>
-                {day.wordOfDay.pron} · {day.wordOfDay.meaning}
+                {`${day.wordOfDay.pron} · ${day.wordOfDay.meaning}`}
               </div>
             </div>
           ) : null}
