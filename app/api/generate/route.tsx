@@ -10,7 +10,10 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const REPLICATE_MODEL = "black-forest-labs/flux-schnell";
-const REPLICATE_TIMEOUT_MS = 25_000;
+// Replicate is usually 2-5s but occasionally queues cold. Budget 40s here,
+// leaving 20s for hero fetch (6s cap) + satori render (~3s) inside the 60s
+// serverless ceiling.
+const REPLICATE_TIMEOUT_MS = 40_000;
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -67,7 +70,7 @@ async function generateHero(prompt: string): Promise<{ url: string | null; error
 
 async function fetchImageAsDataUrl(url: string): Promise<string | null> {
   try {
-    const res = await withTimeout(fetch(url), 8_000, "hero fetch");
+    const res = await withTimeout(fetch(url), 6_000, "hero fetch");
     if (!res.ok) return null;
     const buf = Buffer.from(await res.arrayBuffer());
     const contentType = res.headers.get("content-type") || "image/jpeg";
