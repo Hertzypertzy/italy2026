@@ -72,7 +72,7 @@ export const DAYS: Day[] = [
     schedule: [
       { time: "09:30", emoji: "🚕", title: "Leave for TLV", note: "Passports + snacks" },
       { time: "12:40", emoji: "✈️", title: "Fly to Verona", note: "~4h flight, movie time" },
-      { time: "17:10", emoji: "🛬", title: "Land in Verona", note: "Grab bags, meet driver" },
+      { time: "17:10", emoji: "🛄", title: "Land in Verona", note: "Grab bags, meet driver" },
       { time: "19:00", emoji: "🍝", title: "Dinner in old town", note: "First pasta of the trip!" },
     ],
     trivia: [

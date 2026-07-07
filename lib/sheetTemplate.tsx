@@ -45,7 +45,7 @@ export function SheetTemplate({ day, heroImageUrl }: Props) {
           flexDirection: "column",
           width: "100%",
           height: 620,
-          background: `linear-gradient(160deg, ${accent.color} 0%, ${hexToRgba(accent.color, 0.72)} 55%, ${hexToRgba(accent.color, 0.55)} 100%)`,
+          background: accent.color,
           overflow: "hidden",
         }}
       >
@@ -65,18 +65,22 @@ export function SheetTemplate({ day, heroImageUrl }: Props) {
               width: SHEET_WIDTH,
               height: 620,
               objectFit: "cover",
-              opacity: 0.92,
+              opacity: 1,
             }}
           />
         ) : null}
 
-        {/* Softening gradient over illustration */}
+        {/* Scrim: darker at top for chips, much darker at bottom for title */}
         <div
           style={{
             position: "absolute",
-            inset: 0,
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
             display: "flex",
-            background: `linear-gradient(180deg, ${hexToRgba(accent.color, 0.35)} 0%, rgba(0,0,0,0) 45%, ${hexToRgba("#000000", 0.35)} 100%)`,
+            background:
+              "linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 22%, rgba(0,0,0,0) 42%, rgba(0,0,0,0.75) 100%)",
           }}
         />
 
@@ -201,7 +205,7 @@ export function SheetTemplate({ day, heroImageUrl }: Props) {
                     fontFamily: "Fraunces, serif",
                     fontSize: 44,
                     fontWeight: 700,
-                    color: accent.color,
+                    color: ink,
                     lineHeight: 1,
                     marginTop: 4,
                   }}
@@ -251,9 +255,9 @@ export function SheetTemplate({ day, heroImageUrl }: Props) {
                     display: "flex",
                     width: 96,
                     fontFamily: "Fraunces, serif",
-                    fontSize: 24,
-                    fontWeight: 600,
-                    color: accent.color,
+                    fontSize: 26,
+                    fontWeight: 700,
+                    color: ink,
                   }}
                 >
                   {s.time}

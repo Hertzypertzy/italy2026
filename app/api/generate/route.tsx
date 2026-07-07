@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 import { NextRequest } from "next/server";
 import Replicate from "replicate";
 import { getDay } from "@/data/days";
+import { loadSheetFonts } from "@/lib/fonts";
 import { SheetTemplate, SHEET_HEIGHT, SHEET_WIDTH } from "@/lib/sheetTemplate";
 
 export const runtime = "nodejs";
@@ -66,12 +67,19 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: "unknown_day", dayId }, { status: 400 });
     }
 
-    const hero = await generateHero(day.heroPrompt);
+    const [hero, fonts] = await Promise.all([
+      generateHero(day.heroPrompt),
+      loadSheetFonts().catch((err) => {
+        console.error("font load failed:", err);
+        return [] as Awaited<ReturnType<typeof loadSheetFonts>>;
+      }),
+    ]);
     const heroDataUrl = hero.url ? await fetchImageAsDataUrl(hero.url) : null;
 
     const image = new ImageResponse(<SheetTemplate day={day} heroImageUrl={heroDataUrl} />, {
       width: SHEET_WIDTH,
       height: SHEET_HEIGHT,
+      fonts: fonts.length ? fonts : undefined,
     });
 
     // Drain the ImageResponse body so satori/resvg errors surface here
