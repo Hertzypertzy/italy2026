@@ -7,23 +7,24 @@ export default function Home() {
   const [dayId, setDayId] = useState<string>(DAYS[0]?.id ?? "");
   const [imgUrl, setImgUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [fromCache, setFromCache] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const selected = useMemo(() => DAYS.find((d) => d.id === dayId), [dayId]);
   const accent = selected ? CITY_ACCENTS[selected.city].color : "#2c6bed";
 
-  async function generate() {
+  async function generate(opts: { bust?: boolean } = {}) {
     if (!dayId) return;
     setLoading(true);
     setError(null);
+    setFromCache(false);
     if (imgUrl) URL.revokeObjectURL(imgUrl);
     setImgUrl(null);
     try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ dayId }),
-      });
+      const params = new URLSearchParams({ dayId });
+      if (opts.bust) params.set("bust", String(Date.now()));
+      const started = performance.now();
+      const res = await fetch(`/api/generate?${params}`);
       if (!res.ok) {
         const t = await res.text().catch(() => "");
         throw new Error(t || `Server error ${res.status}`);
@@ -31,6 +32,9 @@ export default function Home() {
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       setImgUrl(url);
+      // If it came back in <1s and we didn't bust, assume edge cache hit.
+      const elapsed = performance.now() - started;
+      setFromCache(!opts.bust && elapsed < 1000);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
     } finally {
@@ -126,6 +130,7 @@ export default function Home() {
             setDayId(e.target.value);
             setImgUrl(null);
             setError(null);
+            setFromCache(false);
           }}
           style={{
             appearance: "none",
@@ -147,7 +152,7 @@ export default function Home() {
         </select>
 
         <button
-          onClick={generate}
+          onClick={() => generate()}
           disabled={loading || !dayId}
           style={{
             appearance: "none",
@@ -210,22 +215,56 @@ export default function Home() {
               border: "1px solid var(--line)",
             }}
           />
-          <button
-            onClick={share}
-            style={{
-              appearance: "none",
-              border: "1px solid var(--line)",
-              padding: "16px 20px",
-              borderRadius: 14,
-              background: "#fff",
-              color: "var(--ink)",
-              fontSize: 17,
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            Share / Download
-          </button>
+          {fromCache ? (
+            <div
+              style={{
+                fontSize: 12,
+                color: "var(--muted)",
+                textAlign: "center",
+                marginTop: -4,
+              }}
+            >
+              Served from cache · Regenerate for a fresh illustration
+            </div>
+          ) : null}
+          <div style={{ display: "flex", gap: 10 }}>
+            <button
+              onClick={share}
+              style={{
+                appearance: "none",
+                border: "1px solid var(--line)",
+                padding: "16px 20px",
+                borderRadius: 14,
+                background: "#fff",
+                color: "var(--ink)",
+                fontSize: 17,
+                fontWeight: 600,
+                cursor: "pointer",
+                flex: 2,
+              }}
+            >
+              Share / Download
+            </button>
+            <button
+              onClick={() => generate({ bust: true })}
+              disabled={loading}
+              style={{
+                appearance: "none",
+                border: "1px solid var(--line)",
+                padding: "16px 12px",
+                borderRadius: 14,
+                background: "#fff",
+                color: "var(--ink)",
+                fontSize: 15,
+                fontWeight: 500,
+                cursor: "pointer",
+                flex: 1,
+              }}
+              title="Get a fresh AI illustration (skips cache)"
+            >
+              Regenerate
+            </button>
+          </div>
         </div>
       ) : null}
     </main>

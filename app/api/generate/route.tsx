@@ -27,7 +27,6 @@ async function generateHero(prompt: string): Promise<{ url: string | null; error
       },
     })) as unknown;
 
-    // flux-schnell can return: string URL, string[], or FileOutput[] (with .url())
     const pick = (v: unknown): string | null => {
       if (typeof v === "string") return v;
       if (v && typeof v === "object" && "url" in v) {
@@ -58,43 +57,68 @@ async function fetchImageAsDataUrl(url: string): Promise<string | null> {
   }
 }
 
+async function render(dayId: string, bust: string | null) {
+  const day = getDay(dayId);
+  if (!day) {
+    return Response.json({ error: "unknown_day", dayId }, { status: 400 });
+  }
+
+  const [hero, fonts] = await Promise.all([
+    generateHero(day.heroPrompt),
+    loadSheetFonts().catch((err) => {
+      console.error("font load failed:", err);
+      return [] as Awaited<ReturnType<typeof loadSheetFonts>>;
+    }),
+  ]);
+  const heroDataUrl = hero.url ? await fetchImageAsDataUrl(hero.url) : null;
+
+  const image = new ImageResponse(<SheetTemplate day={day} heroImageUrl={heroDataUrl} />, {
+    width: SHEET_WIDTH,
+    height: SHEET_HEIGHT,
+    fonts: fonts.length ? fonts : undefined,
+  });
+
+  // Drain the ImageResponse so satori/resvg errors surface inside our try/catch.
+  const buf = Buffer.from(await image.arrayBuffer());
+
+  // If bust is set we still return the fresh PNG but forbid caching so the next
+  // no-bust request re-hits the origin and refreshes the cached copy.
+  const cacheControl = bust
+    ? "no-store"
+    : "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800";
+
+  return new Response(buf, {
+    status: 200,
+    headers: {
+      "content-type": "image/png",
+      "cache-control": cacheControl,
+      "content-disposition": `inline; filename="${day.id}.png"`,
+      "x-hero-source": hero.url ? "replicate" : hero.error || "none",
+    },
+  });
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const url = new URL(req.url);
+    const dayId = url.searchParams.get("dayId") || "";
+    const bust = url.searchParams.get("bust");
+    return await render(dayId, bust);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack || "" : "";
+    console.error("generate route error:", msg, stack);
+    return Response.json({ error: "generate_failed", message: msg, stack }, { status: 500 });
+  }
+}
+
+// Keep POST working for backwards compatibility with any old client.
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
     const dayId = typeof body?.dayId === "string" ? body.dayId : "";
-    const day = getDay(dayId);
-    if (!day) {
-      return Response.json({ error: "unknown_day", dayId }, { status: 400 });
-    }
-
-    const [hero, fonts] = await Promise.all([
-      generateHero(day.heroPrompt),
-      loadSheetFonts().catch((err) => {
-        console.error("font load failed:", err);
-        return [] as Awaited<ReturnType<typeof loadSheetFonts>>;
-      }),
-    ]);
-    const heroDataUrl = hero.url ? await fetchImageAsDataUrl(hero.url) : null;
-
-    const image = new ImageResponse(<SheetTemplate day={day} heroImageUrl={heroDataUrl} />, {
-      width: SHEET_WIDTH,
-      height: SHEET_HEIGHT,
-      fonts: fonts.length ? fonts : undefined,
-    });
-
-    // Drain the ImageResponse body so satori/resvg errors surface here
-    // (not in Next's late pipe-response layer where they become opaque 500s).
-    const buf = Buffer.from(await image.arrayBuffer());
-
-    return new Response(buf, {
-      status: 200,
-      headers: {
-        "content-type": "image/png",
-        "cache-control": "public, max-age=3600, s-maxage=3600",
-        "content-disposition": `inline; filename="${day.id}.png"`,
-        "x-hero-source": hero.url ? "replicate" : hero.error || "none",
-      },
-    });
+    const bust = typeof body?.bust === "string" ? body.bust : null;
+    return await render(dayId, bust);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const stack = err instanceof Error ? err.stack || "" : "";
