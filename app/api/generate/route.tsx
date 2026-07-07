@@ -3,16 +3,16 @@ import { NextRequest } from "next/server";
 import Replicate from "replicate";
 import { getDay } from "@/data/days";
 import { SheetTemplate, SHEET_HEIGHT, SHEET_WIDTH } from "@/lib/sheetTemplate";
-import { loadFonts } from "@/lib/fonts";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const REPLICATE_MODEL = "black-forest-labs/flux-schnell";
 
-async function generateHero(prompt: string): Promise<string | null> {
+async function generateHero(prompt: string): Promise<{ url: string | null; error?: string }> {
   const token = process.env.REPLICATE_API_TOKEN;
-  if (!token) return null;
+  if (!token) return { url: null, error: "REPLICATE_API_TOKEN not set" };
   const replicate = new Replicate({ auth: token });
   try {
     const output = (await replicate.run(REPLICATE_MODEL, {
@@ -27,23 +27,20 @@ async function generateHero(prompt: string): Promise<string | null> {
     })) as unknown;
 
     // flux-schnell can return: string URL, string[], or FileOutput[] (with .url())
-    if (typeof output === "string") return output;
-    if (Array.isArray(output)) {
-      const first = output[0];
-      if (typeof first === "string") return first;
-      if (first && typeof first === "object" && "url" in first) {
-        const u = (first as { url: () => URL | string }).url();
+    const pick = (v: unknown): string | null => {
+      if (typeof v === "string") return v;
+      if (v && typeof v === "object" && "url" in v) {
+        const u = (v as { url: () => URL | string }).url();
         return typeof u === "string" ? u : u.toString();
       }
-    }
-    if (output && typeof output === "object" && "url" in output) {
-      const u = (output as { url: () => URL | string }).url();
-      return typeof u === "string" ? u : u.toString();
-    }
-    return null;
+      return null;
+    };
+    if (Array.isArray(output)) return { url: pick(output[0]) };
+    return { url: pick(output) };
   } catch (err) {
-    console.error("Replicate error:", err);
-    return null;
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("Replicate error:", msg);
+    return { url: null, error: `replicate: ${msg}` };
   }
 }
 
@@ -61,31 +58,31 @@ async function fetchImageAsDataUrl(url: string): Promise<string | null> {
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json().catch(() => ({}));
-  const dayId = typeof body?.dayId === "string" ? body.dayId : "";
-  const day = getDay(dayId);
-  if (!day) {
-    return new Response(JSON.stringify({ error: "unknown_day" }), {
-      status: 400,
-      headers: { "content-type": "application/json" },
+  try {
+    const body = await req.json().catch(() => ({}));
+    const dayId = typeof body?.dayId === "string" ? body.dayId : "";
+    const day = getDay(dayId);
+    if (!day) {
+      return Response.json({ error: "unknown_day", dayId }, { status: 400 });
+    }
+
+    const hero = await generateHero(day.heroPrompt);
+    const heroDataUrl = hero.url ? await fetchImageAsDataUrl(hero.url) : null;
+
+    return new ImageResponse(<SheetTemplate day={day} heroImageUrl={heroDataUrl} />, {
+      width: SHEET_WIDTH,
+      height: SHEET_HEIGHT,
+      headers: {
+        "content-type": "image/png",
+        "cache-control": "public, max-age=3600, s-maxage=3600",
+        "content-disposition": `inline; filename="${day.id}.png"`,
+        "x-hero-source": hero.url ? "replicate" : hero.error || "none",
+      },
     });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack || "" : "";
+    console.error("generate route error:", msg, stack);
+    return Response.json({ error: "generate_failed", message: msg, stack }, { status: 500 });
   }
-
-  const [fonts, heroUrl] = await Promise.all([loadFonts(), generateHero(day.heroPrompt)]);
-  const heroDataUrl = heroUrl ? await fetchImageAsDataUrl(heroUrl) : null;
-
-  return new ImageResponse(<SheetTemplate day={day} heroImageUrl={heroDataUrl} />, {
-    width: SHEET_WIDTH,
-    height: SHEET_HEIGHT,
-    fonts: [
-      { name: "Inter", data: fonts.inter, weight: 500, style: "normal" },
-      { name: "Inter", data: fonts.interBold, weight: 700, style: "normal" },
-      { name: "Fraunces", data: fonts.fraunces, weight: 700, style: "normal" },
-    ],
-    headers: {
-      "content-type": "image/png",
-      "cache-control": "public, max-age=3600, s-maxage=3600",
-      "content-disposition": `inline; filename="${day.id}.png"`,
-    },
-  });
 }
