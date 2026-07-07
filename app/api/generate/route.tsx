@@ -9,7 +9,9 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const REPLICATE_MODEL = "black-forest-labs/flux-schnell";
+// Google's Nano Banana 2 (Gemini 3.1 Flash Image) — dramatically better
+// anatomy / composition / style consistency than flux-schnell at ~$0.04/image.
+const REPLICATE_MODEL = "google/nano-banana-2";
 // Replicate is usually 2-5s but occasionally queues cold. Budget 40s here,
 // leaving 20s for hero fetch (6s cap) + satori render (~3s) inside the 60s
 // serverless ceiling.
@@ -41,10 +43,8 @@ async function generateHero(prompt: string): Promise<{ url: string | null; error
         input: {
           prompt,
           aspect_ratio: "3:2",
+          image_size: "1K",
           output_format: "jpg",
-          output_quality: 85,
-          num_outputs: 1,
-          num_inference_steps: 4,
         },
       }),
       REPLICATE_TIMEOUT_MS,
