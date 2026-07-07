@@ -197,17 +197,17 @@ export function SheetTemplate({ day, heroImageUrl }: Props) {
                   padding: "18px 22px",
                 }}
               >
-                <div style={{ fontSize: 16, color: muted, textTransform: "uppercase", letterSpacing: 1 }}>
+                <div style={{ fontSize: 13, color: muted, textTransform: "uppercase", letterSpacing: 1 }}>
                   {k.label}
                 </div>
                 <div
                   style={{
                     fontFamily: "Fraunces, serif",
-                    fontSize: 44,
+                    fontSize: 38,
                     fontWeight: 700,
                     color: ink,
                     lineHeight: 1,
-                    marginTop: 4,
+                    marginTop: 6,
                   }}
                 >
                   {k.value}
@@ -241,7 +241,7 @@ export function SheetTemplate({ day, heroImageUrl }: Props) {
             Schedule
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {day.schedule.slice(0, 4).map((s, i) => (
+            {day.schedule.slice(0, 5).map((s, i) => (
               <div
                 key={i}
                 style={{
@@ -253,9 +253,9 @@ export function SheetTemplate({ day, heroImageUrl }: Props) {
                 <div
                   style={{
                     display: "flex",
-                    width: 96,
+                    width: 122,
                     fontFamily: "Fraunces, serif",
-                    fontSize: 26,
+                    fontSize: 22,
                     fontWeight: 700,
                     color: ink,
                   }}
